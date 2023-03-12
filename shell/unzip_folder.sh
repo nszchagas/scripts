@@ -13,9 +13,19 @@ if ! cd "$folder"; then
 fi
 
 for file in "$folder"/*.zip; do
-  echo "Starting to unzip file: ${file}"
   mv "$file" "${file//\ /}" 2>/dev/null # Removes, if exists, spaces from names.
-  unzip -o "$file"                      # Flag -o: overwrites files without prompting.
+  file=${file//\ /}
+  folder_name="${file/.zip//}"
+  if ! [[ -d "$folder_name" ]]; then
+    echo "Starting to unzip file: ${file}"
+    unzip -o "$file" -d "$folder_name" # Flag -o: overwrites files without prompting.
+  else
+    echo "Already unzipped $file"
+  fi
 done
+
+echo "Creating backup of zip archives"
+mkdir -p zip_backup
+mv ./*.zip zip_backup
 
 cd "$curr_path" || exit 1
