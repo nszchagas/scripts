@@ -11,7 +11,7 @@ for f in *
     do
         if [[ "$f" =~ ' ' ]] 
             then
-            mv "$f" `echo $f | tr ' ' '_'`;
+            mv "$f" "$(echo "$f" | tr ' ' '_')";
             f=${f// /_}
         fi
         if [ -f $f ]
