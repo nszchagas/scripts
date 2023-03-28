@@ -21,23 +21,6 @@ jobs:
      - run: mkdocs gh-deploy --force
 "
 
-MATHJAX="window.MathJax = {
-  tex: {
-    inlineMath: [['\\(', '\\)']],
-    displayMath: [['\\[', '\\]']],
-    processEscapes: true,
-    processEnvironments: true
-  },
-  options: {
-    ignoreHtmlClass: '.*|',
-    processHtmlClass: 'arithmatex'
-  }
-};
-
-document$.subscribe(() => {
-  MathJax.typesetPromise()
-})
-"
 function create_folders() {
   echo "Print all the subjects for this semester, separated by space. These are the folders and repos names."
 
@@ -70,8 +53,6 @@ function create_mkdocs_yml() {
   for f in "$dest"*/; do
     echo "Creating mkdocs.yml in: $f/mkdocs.yml"
     mkdir -p "$f/codes"
-    mkdir -p "$f/docs/js"
-    echo "$MATHJAX" >"$f/docs/js/mathjax.js"
     subname="$(basename -- "$f")"
     echo "Print description for subject $subname:"
     read -r subdescription
