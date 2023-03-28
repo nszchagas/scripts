@@ -1,0 +1,73 @@
+fig {
+    padding: 0;
+    margin: 0;
+}
+
+fig:before {
+    counter-increment: figuras;
+    white-space: pre;
+    content: "Figura " counter(figuras) ". ";
+}
+
+fig,
+tab {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+
+tab:before {
+    counter-increment: tables;
+    white-space: pre;
+    content: "Tabela " counter(tables) ". ";
+}
+
+fig:after,
+tab:after {
+    white-space: pre;
+    content: " (Fonte: elaborado pelo autor, 2023)";
+}
+
+body {
+    counter-reset: section figuras tables;
+}
+
+
+img {
+    max-width: 100%;
+}
+
+
+.cabecalho {
+    width: 100%
+}
+
+h2 {
+    counter-reset: subsection figure;
+}
+
+h2:before {
+    counter-increment: section;
+    content: counter(section) ". ";
+}
+
+h3:before {
+    counter-increment: subsection;
+    content: counter(section) "." counter(subsection) " ";
+}
+
+img {
+    max-width: 100%
+}
+
+p {
+    text-align: justify;
+}
+
+
+td,
+th {
+    vertical-align: middle !important;
+}
