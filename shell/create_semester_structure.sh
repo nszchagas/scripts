@@ -1,128 +1,114 @@
 #!/bin/bash
 
-dest=$1
-cd "$dest" || echo "Error!"
+# Global variables
+unb_home="$(realpath ~/Documents/unb/)"
+github_user=nszchagas
+script_home="$(pwd)"
 
-PIPELINE="name: deploy
-on:
- push:
-   branches:
-     - master
-     - main
-jobs:
- deploy:
-   runs-on: ubuntu-latest
-   steps:
-     - uses: actions/checkout@v2
-     - uses: actions/setup-python@v2
-       with:
-         python-version: 3.
-     - run: pip install mkdocs-material
-     - run: mkdocs gh-deploy --force
-"
+function config_pipeline() {
+  cd $path
+  print "Creating pipeline in: $path/.github/workflows/deploy.yml"
+  mkdir -p $path/.github/workflows
+  cp $script_home/unb_templates/deploy.yml $path/.github/workflows/deploy.yml
+}
 
-function create_folders() {
-  echo "Print all the subjects for this semester, separated by space. These are the folders and repos names."
+function config_mkdocs() {
+  if [[ -f $path/mkdocs.yml ]]; then
+    print "Mkdocs already configured. Exiting stage..."
+    return 0
+  fi
 
-  read -r subjects
+  cd $path
+  declare -A COLORS=(
+    ["1"]='\033[0;32mgreen\033[0m'
+    ["2"]='\033[0;36mblue\033[0m'
+    ["3"]='\033[0;34mindigo\033[0m'
+    ["4"]='\033[0;35mdeep purple\033[0m'
+    ["5"]='\033[1;35mpink\033[0m'
+    ["6"]='\033[0;31mred\033[0m'
+  )
 
+  echo -e "MKDOCS color options: "
+  for code in "${!COLORS[@]}"; do
+    echo -e "$code) ${COLORS[$code]}${RESET_COLOR}"
+  done
+
+  read -p "Choose the color for $sub: (code 1-6)" opt_1
+
+  export COLOR=${COLORS[$opt_1]}
+  echo -e "Color chosen: $COLOR"
+  read -p "Enter description for $sub: " sub_description
+
+  export sub=$sub
+  export sub_description=$sub_description
+  echo -e "Configuration:\nColor chosen: $COLOR.\nDescription: $sub_description"
+
+  pipenv --python 3.9
+  pipenv install mkdocs mkdocs-material
+  pipenv run mkdocs new .
+
+  envsubst <$script_home/unb_templates/mkdocs.yml >mkdocs.yml
+
+  print "Creating codes and styles structure..."
+  mkdir codes
+  mkdir -p docs/stylesheets/
+  cp $script_home/unb_templates/extra.css docs/stylesheets/extra.css
+
+}
+
+print() {
+  GREEN='\033[0;32m'
+  RESET_COLOR='\033[0m'
+  echo -e "${GREEN}[INFO $(date +"%Y-%m-%d %T")] $1${RESET_COLOR}"
+}
+
+setup_dir() {
+  if ! [[ -d $unb_home ]]; then
+    print "Starting unb_home at $unb_home."
+    mkdir -p $unb_home || return 1
+    print "Done! ($unb_home)"
+  fi
+}
+
+setup_git() {
+  path=$(realpath "$unb_home/$sub")
+  mkdir -p $path
+  cd $path
+
+  remote_url="git@github.com:$github_user/$sub-notes.git"
+
+  if ! [[ -d "$path"/.git/ ]]; then
+    print "Initializing empty git at $path."
+    cd $path && git init . || {
+      print "Error initializing git repository at $path"
+      return 1
+    }
+  else
+    print "Git already configured."
+  fi
+
+  if ! git remote | grep -q "origin"; then
+    print "Adding remote origin: $remote_url"
+    git remote add origin $remote_url
+    git branch -M main
+    git push -u origin main
+  fi
+}
+
+main() {
+  setup_dir
+  subjects="$@"
+
+  print "Creating structure for subjects: $@"
   for sub in $subjects; do
     sub=${sub^^}
-    sub_folder="$dest/$sub"
-    echo "Creating folder structure for $sub, if doesn't exist."
-    mkdir -p "$sub_folder"
-    cd "$sub_folder" || exit 1
-    git init .
-    git branch -m "main"
-    pipenv --python 3.9
-    pipenv run pip install mkdocs mkdocs-material
-    pipenv run mkdocs new .
+    path=$(realpath "$unb_home/$sub")
+    setup_git
+    config_mkdocs
+    config_pipeline
+
   done
+
 }
 
-function create_pipeline() {
-  for f in "$dest"*/; do
-    echo "Creating pipeline in: $f/.github/workflows/deploy.yml"
-    mkdir -p "$f/.github/workflows/"
-    echo "$PIPELINE" >"$f/.github/workflows/deploy.yml"
-    echo "Finished creating pipeline."
-  done
-}
-
-function create_mkdocs_yml() {
-  for f in "$dest"*/; do
-    echo "Creating mkdocs.yml in: $f/mkdocs.yml"
-    mkdir -p "$f/codes"
-    subname="$(basename -- "$f")"
-    echo "Print description for subject $subname:"
-    read -r subdescription
-
-    MKDOCS="site_name: $subdescription
-copyright: 2022 Nicolas Souza
-repo_name: $subname-notes
-repo_url: https://github.com/nszchagas/$subname-notes
-
-theme:
-  name: material
-  logo: _static/icon.png
-  features:
-    - content.code.annotate
-    - content.code.copy
-  favicon: _static/icon.png
-  palette:
-    - media: '(prefers-color-scheme: light)'
-      scheme: default
-      primary: blue grey
-      toggle:
-        icon: material/brightness-7
-        name: Dark mode
-
-    - media: '(prefers-color-scheme: dark)'
-      scheme: slate
-      primary: deep purple
-      toggle:
-        icon: material/brightness-4
-        name: Light mode
-
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets:
-      base_path: ['codes']
-  - pymdownx.superfences
-  - attr_list
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-
-extra_javascript:
-  - js/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
-nav:
-  - About: index.md
-"
-    echo "$MKDOCS" >"$f/mkdocs.yml"
-    echo "Finished creating mkdocs patters."
-  done
-}
-
-while true; do
-  echo "
-  1) Create folders, mkdocs and git repositories for specified subjects.
-  2) Create pipelines
-  3) Create patterned mkdocs.yml
-  *) Exit
-"
-  read -r option
-  case $option in
-  1) create_folders ;;
-  2) create_pipeline ;;
-  3) create_mkdocs_yml ;;
-  *) echo "Exiting" && exit 0 ;;
-  esac
-done
+main $@
