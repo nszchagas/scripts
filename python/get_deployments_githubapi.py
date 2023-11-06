@@ -48,7 +48,6 @@ def get_dataframe(owner: str, repo: str):
     for i, u in enumerate(sts):
         pp = int((100*i/tt))
         print('▇'*pp + '.'*(100-pp) + f'{pp}%')
-        
         rs.append({'id': u['id'],
                    lbl_env: u[lbl_env],
                    lbl_status: int('success' in ''.join([s['state'] for s in get(u['url'])]))})
@@ -65,8 +64,8 @@ def get_dataframe(owner: str, repo: str):
     e['Success (%)'] = (e[lbl_success] /
                         (e[lbl_failed] + e[lbl_success])) * 100
 
-    print(s.to_string())
-    print(e)
+    print(s.to_csv())
+    print(e.to_csv())
 
 
 try:
