@@ -1,0 +1,3 @@
+
+jbl="$(bluetoothctl devices | grep -i -e tune520bt  --color | grep -v '-' | awk -F ' ' '{print $2}')"
+bluetoothctl connect $jbl

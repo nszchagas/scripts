@@ -1,0 +1,40 @@
+site_name: Resumos
+copyright: 2023 Nicolas Souza
+repo_name: RESUMOS-notes
+repo_url: https://github.com/nszchagas/RESUMOS-notes
+
+theme:
+  name: material
+  logo: assets/icon.png
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - toc.integrate
+  favicon: assets/icon.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: \033[1;35mpink\033[0m
+      toggle:
+        icon: material/brightness-7
+        name: Dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: \033[1;35mpink\033[0m
+      toggle:
+        icon: material/brightness-4
+        name: Light mode
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["codes"]
+  - pymdownx.superfences
+  - attr_list
+
+nav:
+  - Início: index.md

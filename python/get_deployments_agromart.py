@@ -27,7 +27,9 @@ def get_dataframe():
     print(f'Found {tt} deployments. Getting details...')
     rs = [{'id': u['id'],
            'Environment': u['Environment'],
-           'Status': int('success' in ''.join([s['state'] for s in get(u['url'])]))} for u in sts]
+           'Status': int('success' in ''.join([s['state']
+                                               for s in get(u['url'])]))}
+          for u in sts]
 
     df: DataFrame = DataFrame.from_records(rs).sort_values(by='Environment')
 

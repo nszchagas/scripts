@@ -1,0 +1,15 @@
+#start=$1
+#end=$2
+#file=$3
+
+#echo "$(seq $start $end)" >>$file
+
+while getopts ":s:e:f:" option; do
+	echo $option
+	case $option in
+		s) echo "start = $option" ;;
+		e) echo "end = $option" ;;
+		f) echo "file = $option" ;;
+		*) echo "non recognized: $option";;
+	esac
+done

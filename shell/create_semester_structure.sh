@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Global variables
-unb_home="$(realpath ~/Documents/unb/)"
+unb_home="$(realpath ~/documents/unb/)"
 github_user=nszchagas
 script_home="$(pwd)"
 

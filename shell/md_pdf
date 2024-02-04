@@ -1,0 +1,17 @@
+#!/bin/bash
+
+file=$1
+
+pandoc $file -f markdown -t html -o temp.html
+echo "<head><meta charset="utf-8"/></head> 
+<style>@page{margin: 10mm;size: A4 portrait}
+</style>$(cat temp.html)" >temp.html
+
+dest="$(pwd)/${file%%.*}.pdf"
+source="$(pwd)/temp.html"
+
+edge --headless --disable-gpu --run-all-compositor-stages-before-draw \
+    --print-to-pdf="$dest" --print-to-pdf-no-header "$(pwd)"/temp.html
+
+sleep 0.5
+rm temp.html
