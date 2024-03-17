@@ -1,0 +1,45 @@
+#!/bin/bash
+
+HOME=$HOME/code
+cd $HOME
+
+start="$1"
+end="$2"
+
+if [ -z "$start" ]; then
+    start=2023-11-12
+fi
+
+if [ -n "$end" ]; then
+    end="--until=\"$end\""
+fi 
+
+repos="repo1 repo2 repo3"
+
+for x in $repos; do
+    cd "$HOME/$x"
+    y=$(echo "$x" | sed -e 's|unb/||g' -e 's|\/||g')
+    git log --date=format:'%Y-%m-%dT%H:%M:%S%z' $end --since="$start" --format="%cd ($y) %s" >> $HOME/unb/diario/commits
+    cd $HOME
+done
+
+cd $HOME/unb/diario
+
+sort commits > sorted
+
+cat sorted | awk -F 'T' '{ if ($1 == prev_date) { print $0 } else { print "\n" $0 } prev_date=$1 }' > grouped
+
+awk 'BEGIN { RS = "" } { print > sprintf("%02d_day", NR) }' grouped
+
+
+for x in *_day; do   
+   if ! [ -f $x ]; then continue; fi 
+   y=$(date -d"$(head -n1 "$x" | awk '{print $1}')" +"%Y-%m-%d")
+   n="${y}T"
+   sed -e "s/$n//g" $x -i 
+   echo -e "\e[31m$y\e[0m"
+   cat $x
+done
+
+
+rm -f commits sorted grouped *_day 

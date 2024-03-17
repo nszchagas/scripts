@@ -4,3 +4,8 @@
 
 # Debug
 *.log
+
+# Requests Files
+*.pdf
+*.html
+*.json
