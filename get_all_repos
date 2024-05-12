@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source .secrets
+
+TOKEN=$GITHUB_TOKEN
+size=50
+
+curl -s -u ":$TOKEN" "https://api.github.com/user/repos?per_page=$size" | jq -r '.[].clone_url'
+

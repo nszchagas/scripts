@@ -1,0 +1,5 @@
+#!/bin/bash
+redes_url=https://aprender3.unb.br/my/courses.php
+aprender_password=$(echo $apr_b64 | base64 --decode)
+curl -X POST -d "{'username': '03548041116', 'password': '$aprender_password'}" https://aprender3.unb.br/login/index.php -o html_login -c cookies
+curl -b cookies -X GET $redes_url -s -o redes_html -v

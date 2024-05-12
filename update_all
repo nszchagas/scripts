@@ -1,0 +1,11 @@
+#!/bin/bash
+
+home=$(pwd)
+for folder in */; do
+	cd $home
+	echo " >>>>> Updating $folder...";
+	cd ./$folder || exit 1 
+	git status
+	git pull ||  echo ">>>>> Couldn't pull from origin at $folder." 
+	
+done
